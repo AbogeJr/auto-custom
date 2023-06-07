@@ -7,7 +7,6 @@ class ProductSupplierInfo(models.Model):
     supplier_type = fields.Selection(
         [("local", "Local"), ("international", "International")],
         string="Locality",
-        default="local",
     )
 
 
@@ -17,3 +16,11 @@ class StockWarehouseOrderpoint(models.Model):
     supplier_type = fields.Selection(
         related="supplier_id.supplier_type", string="Locality"
     )
+
+    _sql_constraints = [
+        (
+            "product_location_check",
+            "unique (supplier_id, supplier_type)",
+            "Inheritance Works.",
+        ),
+    ]
