@@ -21,6 +21,6 @@ class StockWarehouseOrderpoint(models.Model):
         (
             "product_location_check",
             "unique (supplier_id, supplier_type)",
-            "Inheritance Works.",
+            "Two suppliers cannot be from the same locality. (i.e Local or International)",
         ),
     ]
