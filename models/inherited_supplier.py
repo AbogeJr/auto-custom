@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import fields, models, api
 
 
 class ProductSupplierInfo(models.Model):
@@ -7,6 +7,8 @@ class ProductSupplierInfo(models.Model):
     supplier_type = fields.Selection(
         [("local", "Local"), ("international", "International")],
         string="Locality",
+        default="local",
+        store=True,
     )
 
 
@@ -14,13 +16,13 @@ class StockWarehouseOrderpoint(models.Model):
     _inherit = "stock.warehouse.orderpoint"
 
     supplier_type = fields.Selection(
-        related="supplier_id.supplier_type", string="Locality"
+        related="supplier_id.supplier_type", string="Locality", store=True
     )
 
     _sql_constraints = [
         (
             "product_location_check",
-            "unique (supplier_id, supplier_type)",
-            "Two suppliers cannot be from the same locality. (i.e Local or International)",
+            "unique (supplier_type)",
+            "The supplier must be unique!",
         ),
     ]
