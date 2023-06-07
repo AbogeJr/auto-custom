@@ -21,8 +21,13 @@ class StockWarehouseOrderpoint(models.Model):
 
     _sql_constraints = [
         (
+            "supplier_locality_check",
+            "unique (product_id, supplier_type)",
+            "You can not have more than one supplier from the same locality!",
+        ),
+        (
             "product_location_check",
-            "unique (supplier_type)",
-            "The supplier must be unique!",
+            "CHECK(1=1)",
+            "A replenishment rule already exists.",
         ),
     ]
