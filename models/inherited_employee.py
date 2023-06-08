@@ -1,4 +1,4 @@
-from odoo import fields, models, api
+from odoo import fields, models
 
 
 class InheritedEmployee(models.AbstractModel):
@@ -8,7 +8,6 @@ class InheritedEmployee(models.AbstractModel):
     state = fields.Selection(
         [("draft", "Draft"), ("employee", "Employee"), ("resigned", "Resigned")],
         string="State",
-        # store=True,
         default="draft",
     )
     active = fields.Boolean(default=True)
