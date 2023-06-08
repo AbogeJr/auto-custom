@@ -1,0 +1,18 @@
+<odoo>
+    <data>
+        <record id="view_hr_employee_inherit" model="ir.ui.view">
+            <field name="name">hr.employee.form.inherit</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='coach_id']" position="after">
+                    <field name="state"/>
+                </xpath>
+                <xpath expr="//header" position="inside">
+                    <button type="object"  name="set_employee" string="Confirm Employee" attrs="{'invisible': ['|', ('state', '=', 'employee'), ('state', '=', 'retired')]}" />
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>
