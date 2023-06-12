@@ -45,12 +45,12 @@ class InheritStockWarehouseOrderpoint(models.Model):
     def _procure_orderpoint_confirm(
         self, use_new_cursor=False, company_id=None, raise_user_error=True
     ):
-        orderpoints = self.filtered(lambda op: op.qty_available < op.product_min_qty)
+        orderpoints = self.filtered(lambda op: op.qty_on_hand < op.product_min_qty)
+
         for orderpoint in orderpoints:
             vendor = orderpoint.supplier_id
 
-            if vendor:
-                # Create procurement for the vendor
+            if orderpoint.qty_on_hand < 0 and orderpoint.supplier_type == "local":
                 procurement_vals = {
                     "product_id": orderpoint.product_id.id,
                     "product_qty": orderpoint.qty_to_order,
@@ -59,9 +59,7 @@ class InheritStockWarehouseOrderpoint(models.Model):
                     "origin": orderpoint.name,
                     "company_id": orderpoint.company_id.id,
                 }
-                self.env["procurement.group"].run(
-                    [self.env["procurement.group"].Procurement(**procurement_vals)]
-                )
+                self.env["procurement.group"].Procurement(**procurement_vals)
 
         return super(InheritStockWarehouseOrderpoint, self)._procure_orderpoint_confirm(
             use_new_cursor=use_new_cursor,
