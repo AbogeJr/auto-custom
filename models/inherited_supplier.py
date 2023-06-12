@@ -34,6 +34,13 @@ class InheritStockWarehouseOrderpoint(models.Model):
         ),
     ]
 
+    def _prepare_procurement_values(self, date=False, group=False):
+        # Add the supplier_type to the procurement values
+        procurement_values = super()._prepare_procurement_values(date=date, group=group)
+        procurement_values["supplier_type"] = self.supplier_type
+
+        return procurement_values
+
     @api.model
     def _procure_orderpoint_confirm(
         self, use_new_cursor=False, company_id=None, raise_user_error=True
