@@ -45,50 +45,46 @@ class InheritStockWarehouseOrderpoint(models.Model):
 
         return procurement_values
 
-    @api.model
     def _procure_orderpoint_confirm(
         self, use_new_cursor=False, company_id=None, raise_user_error=True
     ):
         orderpoints = self.filtered(lambda op: op.qty_on_hand < op.product_min_qty)
+        print(len(orderpoints))
 
+        # Filter orderpoints based on matching product_ids and select minimum product_min_qty
+
+        orderpoints_by_product = {}
         for orderpoint in orderpoints:
+            product_id = orderpoint.product_id
+            if product_id in orderpoints_by_product:
+                existing_orderpoint = orderpoints_by_product[product_id]
+                if orderpoint.product_min_qty < existing_orderpoint.product_min_qty:
+                    orderpoints_by_product[product_id] = orderpoint
+            else:
+                orderpoints_by_product[product_id] = orderpoint
+
+        for orderpoint in orderpoints_by_product.values():
             print("=============ORDERPOINT=============")
             print(orderpoint.name)
             print(orderpoint.qty_on_hand)
             print(orderpoint.product_min_qty)
-            print(orderpoint.supplier_type)
+            print(orderpoint.group_id)
             print(orderpoint.product_id.name)
             print("=============ORDERPOINT=============")
 
-            if (
-                orderpoint.qty_on_hand <= orderpoint.product_min_qty
-                and orderpoint.supplier_type == "local"
-            ):
-                print("Local")
-                date = orderpoint._get_orderpoint_procurement_date()
-                global_visibility_days = (
-                    self.env["ir.config_parameter"]
-                    .sudo()
-                    .get_param("stock.visibility_days")
-                )
-                if global_visibility_days:
-                    date -= relativedelta.relativedelta(
-                        days=int(global_visibility_days)
-                    )
-                values = orderpoint._prepare_procurement_values(date=date)
-                procurement_vals = {
-                    "product_id": orderpoint.product_id.id,
-                    "product_qty": orderpoint.qty_to_order,
-                    "product_uom": orderpoint.product_uom.id,
-                    # "partner_id": vendor.id,
-                    # "supplier_type": orderpoint.supplier_type,
-                    "location_id": orderpoint.location_id.id,
-                    "name": orderpoint.name,
-                    "origin": orderpoint.name,
-                    "company_id": orderpoint.company_id.id,
-                    "values": values,
-                }
-                self.env["procurement.group"].Procurement(**procurement_vals)
+            values = orderpoint._prepare_procurement_values()
+
+            procurement_vals = {
+                "product_id": orderpoint.product_id.id,
+                "product_qty": orderpoint.qty_to_order,
+                "product_uom": orderpoint.product_uom.id,
+                "location_id": orderpoint.location_id.id,
+                "name": orderpoint.name,
+                "origin": orderpoint.name,
+                "company_id": orderpoint.company_id.id,
+                "values": values,
+            }
+            self.env["procurement.group"].Procurement(**procurement_vals)
 
         return super(InheritStockWarehouseOrderpoint, self)._procure_orderpoint_confirm(
             use_new_cursor=use_new_cursor,
