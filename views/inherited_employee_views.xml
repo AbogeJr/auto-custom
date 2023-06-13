@@ -7,8 +7,10 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='coach_id']" position="after">
                     <field name="state"/>
+                    
                 </xpath>
                 <xpath expr="//header" position="inside">
+                    <field name="state" widget="statusbar" />
                     <button type="object"  name="set_employee" string="Confirm Employee" attrs="{'invisible': ['|', ('state', '=', 'employee'), ('state', '=', 'retired')]}" />
                 </xpath>
             </field>
