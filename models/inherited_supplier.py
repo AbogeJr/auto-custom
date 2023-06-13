@@ -1,4 +1,8 @@
-from odoo import fields, models, api
+from odoo import fields, models, api, tools, registry, SUPERUSER_ID, exceptions
+from dateutil import relativedelta
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class ProductSupplierInfo(models.Model):
@@ -48,16 +52,41 @@ class InheritStockWarehouseOrderpoint(models.Model):
         orderpoints = self.filtered(lambda op: op.qty_on_hand < op.product_min_qty)
 
         for orderpoint in orderpoints:
-            vendor = orderpoint.supplier_id
+            print("=============ORDERPOINT=============")
+            print(orderpoint.name)
+            print(orderpoint.qty_on_hand)
+            print(orderpoint.product_min_qty)
+            print(orderpoint.supplier_type)
+            print(orderpoint.product_id.name)
+            print("=============ORDERPOINT=============")
 
-            if orderpoint.qty_on_hand < 0 and orderpoint.supplier_type == "local":
+            if (
+                orderpoint.qty_on_hand <= orderpoint.product_min_qty
+                and orderpoint.supplier_type == "local"
+            ):
+                print("Local")
+                date = orderpoint._get_orderpoint_procurement_date()
+                global_visibility_days = (
+                    self.env["ir.config_parameter"]
+                    .sudo()
+                    .get_param("stock.visibility_days")
+                )
+                if global_visibility_days:
+                    date -= relativedelta.relativedelta(
+                        days=int(global_visibility_days)
+                    )
+                values = orderpoint._prepare_procurement_values(date=date)
                 procurement_vals = {
                     "product_id": orderpoint.product_id.id,
                     "product_qty": orderpoint.qty_to_order,
                     "product_uom": orderpoint.product_uom.id,
-                    "partner_id": vendor.id,
+                    # "partner_id": vendor.id,
+                    # "supplier_type": orderpoint.supplier_type,
+                    "location_id": orderpoint.location_id.id,
+                    "name": orderpoint.name,
                     "origin": orderpoint.name,
                     "company_id": orderpoint.company_id.id,
+                    "values": values,
                 }
                 self.env["procurement.group"].Procurement(**procurement_vals)
 
