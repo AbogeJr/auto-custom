@@ -10,6 +10,7 @@ class InheritedEmployee(models.AbstractModel):
         string="State",
         default="draft",
     )
+    bank = fields.Many2one("res.bank", string="Bank")
 
     # For button to confirm employee in draft status
     def set_employee(self):

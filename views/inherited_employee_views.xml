@@ -7,7 +7,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='coach_id']" position="after">
                     <field name="state"/>
-                    
+                    <field name="bank" />
                 </xpath>
                 <xpath expr="//header" position="inside">
                     <field name="state" widget="statusbar" />

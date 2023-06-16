@@ -41,6 +41,15 @@ class InheritStockWarehouseOrderpoint(models.Model):
         ),
     ]
 
+    def _prepare_procurement_values(self, date=False, group=False):
+        """Prepare specific key for moves or other components that will be created from a stock rule
+        comming from an orderpoint. This method could be override in order to add other custom key that could
+        be used in move/po creation.
+        """
+        res = super()._prepare_procurement_values(date=date, group=group)
+        res["supplier_type"] = self.supplier_type
+        return res
+
     def _procure_orderpoint_confirm(
         self, use_new_cursor=False, company_id=None, raise_user_error=True
     ):
@@ -77,13 +86,14 @@ class InheritStockWarehouseOrderpoint(models.Model):
                             orderpoints_by_product[product_id] = orderpoint
 
                     for orderpoint in orderpoints_by_product.values():
-                        # print("=============ORDERPOINT BY PRODUCT=============")
-                        # print(orderpoint.name)
-                        # print(orderpoint.qty_on_hand)
-                        # print(orderpoint.product_min_qty)
-                        # print(orderpoint.group_id)
-                        # print(orderpoint.product_id.name)
-                        # print("=============ORDERPOINT BY PRODUCT=============")
+                        print("=============ORDERPOINT BY PRODUCT=============")
+                        print(orderpoint.name)
+                        print(orderpoint.qty_on_hand)
+                        print(orderpoint.product_min_qty)
+                        print(orderpoint.group_id)
+                        print(orderpoint.product_id.name)
+                        # print(orderpoint.origin)
+                        print("=============ORDERPOINT BY PRODUCT=============")
                         origins = orderpoint.env.context.get("origins", {}).get(
                             orderpoint.id, False
                         )
@@ -94,6 +104,9 @@ class InheritStockWarehouseOrderpoint(models.Model):
                             )
                         else:
                             origin = orderpoint.name
+                        print("=============ORIGINS=============")
+                        print(origin)
+                        print("=============ORIGINS=============")
                         if (
                             tools.float_compare(
                                 orderpoint.qty_to_order,
