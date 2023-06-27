@@ -46,8 +46,23 @@ class InheritStockWarehouseOrderpoint(models.Model):
         comming from an orderpoint. This method could be override in order to add other custom key that could
         be used in move/po creation.
         """
+
         res = super()._prepare_procurement_values(date=date, group=group)
-        res["supplier_type"] = self.supplier_type
+        print("====PREPARE PROCUREMENT VALUES OVERRIDE=====")
+        print(self.supplier_type)
+        print(self.product_id.id)
+        print(self.product_id.seller_ids)
+        # print(self.product_id.seller_ids)
+        print(self.id)
+        supplier = self.product_id.seller_ids.filtered(
+            lambda s: s.supplier_type == self.supplier_type
+        )
+        if supplier:
+            print(supplier)
+        else:
+            print("No supplier found")
+
+        res["supplierinfo_id"] = supplier
         return res
 
     def _procure_orderpoint_confirm(
@@ -88,6 +103,8 @@ class InheritStockWarehouseOrderpoint(models.Model):
                     for orderpoint in orderpoints_by_product.values():
                         print("=============ORDERPOINT BY PRODUCT=============")
                         print(orderpoint.name)
+                        print(orderpoint.supplier_type)
+                        # print(orderpoint.supplier_type)
                         print(orderpoint.qty_on_hand)
                         print(orderpoint.product_min_qty)
                         print(orderpoint.group_id)
@@ -104,9 +121,6 @@ class InheritStockWarehouseOrderpoint(models.Model):
                             )
                         else:
                             origin = orderpoint.name
-                        print("=============ORIGINS=============")
-                        print(origin)
-                        print("=============ORIGINS=============")
                         if (
                             tools.float_compare(
                                 orderpoint.qty_to_order,
@@ -126,6 +140,8 @@ class InheritStockWarehouseOrderpoint(models.Model):
                                     days=int(global_visibility_days)
                                 )
                             values = orderpoint._prepare_procurement_values(date=date)
+                            # values["supplierinfo_id"] = orderpoint.supplier_id.id
+                            print(values)
                             procurements.append(
                                 self.env["procurement.group"].Procurement(
                                     orderpoint.product_id,
