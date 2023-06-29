@@ -52,7 +52,7 @@ class InheritStockWarehouseOrderpoint(models.Model):
         print(self.supplier_type)
         print(self.product_id.id)
         print(self.product_id.seller_ids)
-        # print(self.product_id.seller_ids)
+        print(self.product_id.purchase_order_line_ids)
         print(self.id)
         supplier = self.product_id.seller_ids.filtered(
             lambda s: s.supplier_type == self.supplier_type
